@@ -1,0 +1,32 @@
+//面板
+@import "common.styl"
+
+.panel {
+  position: relative;
+  background: #fff;
+  margin-top: 10px;
+  overflow: hidden;
+
+  &::after {
+    border_line();
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+  }
+}
+
+.panel-title {
+  font-size: 14px;
+  line-height: 1;
+  color: #999;
+  padding: 20px 15px 0;
+}
+
+.panel-no_top {
+  margin-top: 0;
+}
+
+.panel-no_border {
+  &::after {
+    border: none;
+  }
+}

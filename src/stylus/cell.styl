@@ -1,0 +1,118 @@
+//单元格
+@import "common.styl"
+
+.cell {
+  position: relative;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+
+  &:not(:last-child)::after {
+    border_line()
+    border-bottom-width: 1px;
+    left: 15px;
+  }
+
+  .cell_icon {
+    margin-right: 5px;
+    color: #999;
+  }
+  .cell_img {
+    margin-right: 5px;
+    font-size 0;
+    line-height 0;
+
+    img {
+      width 20px;
+      height 20px;
+    }
+  }
+  .cell_left {
+    flex: 1;
+
+    .cell_left_text {
+      line-height: 24px;
+    }
+
+    .cell_left_desc {
+      line-height: 1.2;
+      font-size: 12px;
+      color: $gray;
+    }
+  }
+
+  .cell_right {
+    position: relative;
+    color: $gray;
+  }
+}
+
+.cell-arrow {
+  position: relative;
+
+  .cell_right {
+    padding-right: 13px;
+
+    &::after {
+      arrow_right()
+    }
+  }
+}
+
+.cell-switch {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.cell-no_pading {
+  padding: 0;
+
+  .cell_left-padding {
+    padding: 12px 0 12px 15px;
+  }
+
+  .cell_right-padding {
+    padding: 12px 15px 12px 0;
+  }
+}
+
+.cell-border_line {
+  position: relative;
+
+  &:not(:last-child)::after {
+    border_line()
+    border-bottom-width: 1px;
+    left: 15px;
+  }
+}
+
+// 表单单元格
+.field,
+.field_left,
+.field_right {
+}
+
+.field {
+  width 100%;
+  display flex;
+  align-items center;
+  padding: 15px;
+  box-sizing border-box;
+  font-size 14px;
+
+  .field_left {
+    flex: none;
+    align-self: center;
+  }
+
+  .field_right {
+    width 0;
+    flex: 1;
+    word-wrap: break-word;
+
+    input {
+      padding: 0 15px;
+    }
+  }
+}

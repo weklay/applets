@@ -1,0 +1,21 @@
+//活动面板
+@import "common.styl"
+
+.fold_panel {
+  position: relative;
+  padding: 15px;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.fold_panel-arrow_top {
+  &::after {
+    arrow_top();
+  }
+}
+
+.fold_panel-arrow_bottom {
+  &::after {
+    arrow_bottom();
+  }
+}
