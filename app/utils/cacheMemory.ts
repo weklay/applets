@@ -11,10 +11,10 @@ const cache = new Map<string, CacheItem>()
  * @param data 数据
  * @param ttl 过期时间（秒）
  */
-export function setMemoryCache(key: string, data: object, ttl: number) {
+export function setMemoryCache(key: string, data: object | unknown, ttl: number) {
   if (import.meta.server) {
     const expires = Date.now() + ttl * 1000
-    cache.set(key, { data, expires })
+    cache.set(key, { data: data || '', expires })
   }
 }
 

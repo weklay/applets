@@ -8,7 +8,7 @@ export default defineNuxtConfig({
     https: false // 如果不需要 HTTPS
   },
   devtools: { enabled: false },
-  modules: ['@nuxt/eslint', '@unocss/nuxt'],
+  modules: ['@nuxt/eslint', '@unocss/nuxt', '@pinia/nuxt'],
   runtimeConfig: {
     public: {
       apiBase: '/api'
