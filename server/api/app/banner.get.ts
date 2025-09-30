@@ -4,9 +4,15 @@ export default defineEventHandler(event => {
   return {
     message: '成功',
     code: 200,
-    data: {
-      url: 'https://oss.unismartcloud.com/ID/20250928/uY4fKMNEX/43732323eddfc87f13d6c1901b584b45.webp?auth_key=1759190400-0-0-ccd334039b883b90c9324a8ba83c7ca2',
-      host: 'unismartcloud.com'
-    }
+    data: [
+      { url: '/siteadmin/upload/img/1917133146671624194.avif', link: 'home/promote' },
+      { url: '/siteadmin/upload/img/1917133255503220737.avif', link: 'home/promote' },
+      { url: '/siteadmin/upload/img/1916749462155390978.avif', link: 'home/promote' },
+      { url: '/siteadmin/upload/img/1916749037275811842.avif', link: 'home/promote' },
+      { url: '/siteadmin/upload/img/1916748859413204993.avif', link: 'home/promote' },
+      { url: '/siteadmin/upload/img/1916435567492354049.avif', link: 'home/promote' },
+      { url: '/siteadmin/upload/img/1916434729204654082.avif', link: 'home/promote' },
+      { url: '/siteadmin/upload/img/1916434398465019906.avif', link: 'home/promote' }
+    ]
   }
 })

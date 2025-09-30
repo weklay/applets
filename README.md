@@ -2,13 +2,23 @@
 
 Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
-## Setup
+## Css命名规则
 
 Make sure to install dependencies:
 
 ```bash
-# npm
-npm install
+# flex
+限定命名规则: flex-{方向}-{交叉轴对齐}-{主轴对齐}
+方向: row,col 取首字母|r|c|
+交叉轴对齐[align-items]: start, center, end 取首字母|s|c|e
+主轴对齐[justify-content]: start, center, end, space-between, 取首字母|s|c|e|b
+# 示例
+.flex{display: flex;}
+.flex-col{display: flex;flex-direction: column;}
+.flex-rcc{display: flex; flex-direction: row; align-items: center; justify-content: center;}
+.flex-rcb{display: flex; flex-direction: row; align-items: center; justify-content: space-between;}
+.flex-ccc{display: flex; flex-direction: column; align-items: center; justify-content: center;}
+.flex-csb{display: flex; flex-direction: column; align-items: start; justify-content: space-between;}
 
 # pnpm
 pnpm install

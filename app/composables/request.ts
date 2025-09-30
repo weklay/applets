@@ -53,5 +53,5 @@ function http<T>(url: string, method: 'GET' | 'POST', opts: optInter = {}, forma
 
 // 首页api
 export const apiHome = {
-  banner: () => http<string>('/app/banner', 'GET', {}, 'data.url')
+  banner: () => http<[{ url: '' }]>('/app/banner', 'GET', {}, 'data')
 }

@@ -1,3 +1,8 @@
+// 获取资源cdn
+export function getCdn(url: string): string {
+  return useRuntimeConfig().public.cdnHost + url
+}
+
 // 类型守卫：判断是否为普通对象
 function isObject(obj: unknown): obj is Record<string, unknown> {
   return obj !== null && typeof obj === 'object' && !Array.isArray(obj)

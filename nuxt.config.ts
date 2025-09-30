@@ -22,7 +22,8 @@ export default defineNuxtConfig({
   modules: ['@nuxt/eslint', '@unocss/nuxt', '@pinia/nuxt'],
   runtimeConfig: {
     public: {
-      apiBase: '/api'
+      apiBase: '/api',
+      cdnHost: 'https://gj-h5vip2-o9c-2c9-cvip.japanwest.cloudapp.azure.com'
     }
   },
   vite: {
