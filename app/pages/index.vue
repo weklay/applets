@@ -44,11 +44,7 @@ const gameOpts = [
     > -->
       <!--banner-->
       <div class="pt-20 pb-9 pl-20 pr-20">
-        <KuiBanner :total="bannerList.length">
-          <template v-for="(item, index) in bannerList" :key="index">
-            <KuiImg :src="getCdn(item.url)" class="w100 h-209 radius-16" />
-          </template>
-        </KuiBanner>
+        <KuiBanner :list="bannerList" />
       </div>
       <!--通知-->
       <div class="flex-rcb px-25 h-60">

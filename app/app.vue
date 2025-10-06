@@ -65,5 +65,6 @@ html[data-ui-contain='1'] {
 }
 body {
   background: var(--klay-bg);
+  user-select: none;
 }
 </style>

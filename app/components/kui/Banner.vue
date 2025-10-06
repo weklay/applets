@@ -1,260 +1,168 @@
 <template>
-  <div ref="carouselRef" class="banner-carousel" @mousedown="onDragStart" @touchstart="onDragStart" @mouseleave="handleMouseLeave">
+  <div
+    ref="bannerRef"
+    class="banner-swiper"
+    @pointerdown="onPointerDown"
+    @pointerup="onPointerUp"
+    @pointerleave="onPointerUp"
+    @pointercancel="onPointerUp"
+  >
     <!-- 轮播轨道 -->
     <div
       ref="trackRef"
-      class="banner-carousel__track"
+      class="banner-track"
       :style="{
-        transform: `translateX(${-currentIndex * 100}%)`,
-        transition: isDragging ? 'none' : 'transform 0.5s ease-in-out'
+        transform: `translate3d(${trackOffset}px, 0, 0)`,
+        transition: isDragging ? 'none' : 'transform 0.4s'
       }"
     >
-      <div class="banner-carousel__slide">
-        <template v-for="(item, index) in banners" :key="index">
-          <img v-if="item" :src="item" loading="lazy" draggable="false" />
-        </template>
-        <slot />
-      </div>
+      <template v-for="(item, index) in virtualData" :key="index">
+        <KuiImg :src="getCdn(item.url)" class="w100 h-209 shrink-0 radius-16" />
+      </template>
     </div>
 
     <!-- 指示器 -->
-    <div class="banner-carousel__dots">
-      <button v-for="(_, i) in total || banners" :key="i" :class="{ active: i === currentIndex }" class="dot" @click="goTo(i)" />
+    <div class="banner-dots">
+      <span v-for="(_, i) in list.length" :key="i" :class="{ 'banner-dots_active': i === currentIndex }" class="banner-dots_item" @click="goTo(i)" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, onDeactivated, watch } from 'vue'
-
 const props = withDefaults(
   defineProps<{
-    banners?: string[]
-    total?: number
-    autoPlay?: boolean
-    interval?: number
+    list: { url: '' }[]
+    autoPlay?: number
   }>(),
   {
-    banners: () => [],
-    total: 0,
-    autoPlay: true,
-    interval: 4000
+    autoPlay: 5000
   }
 )
-
-const emit = defineEmits<{
-  (e: 'update:currentIndex', index: number): void
-}>()
-
-const carouselRef = ref<HTMLElement | null>(null)
-const trackRef = ref<HTMLElement | null>(null)
-
-const currentIndex = ref(0)
+// 虚拟列表（循环用）
+const virtualData = ref([...props.list])
+// dom
+const bannerRef = ref()
+const trackRef = ref()
+// 当前下标
+const currentIndex = ref(0) // 真实索引
+const virtualIndex = ref(0) // 虚拟索引
+let offsetCount = 0
+const trackOffset = ref(0)
+// 拖拽状态
 const isDragging = ref(false)
-const startPos = ref(0)
-let autoPlayTimer: ReturnType<typeof setTimeout> | null = null
-
-// 自动播放
-function startAutoPlay() {
-  if (!props.autoPlay || props.banners.length <= 1) return
-  autoPlayTimer = setTimeout(() => {
-    next()
-    startAutoPlay()
-  }, props.interval)
-}
-
-function stopAutoPlay() {
-  if (autoPlayTimer) {
-    clearTimeout(autoPlayTimer)
-    autoPlayTimer = null
-  }
-}
-
-// 导航
-function goTo(index: number) {
-  currentIndex.value = index
-  emit('update:currentIndex', index)
-}
-
-function next() {
-  currentIndex.value = (currentIndex.value + 1) % props.banners.length
-  emit('update:currentIndex', currentIndex.value)
-}
-
-function prev() {
-  currentIndex.value = (currentIndex.value - 1 + props.banners.length) % props.banners.length
-  emit('update:currentIndex', currentIndex.value)
-}
-
-// 安全获取 clientX
-function getClientX(e: MouseEvent | TouchEvent): number | null {
-  if ('clientX' in e) {
-    // MouseEvent
-    return e.clientX
-  }
-
-  // TouchEvent
-  if ('touches' in e && e.touches.length > 0) {
-    return e.touches[0]?.clientX || null
-  }
-  if ('changedTouches' in e && e.changedTouches.length > 0) {
-    return e.changedTouches[0]?.clientX || null
-  }
-
-  return null
-}
-
-// 拖拽开始
-function onDragStart(e: MouseEvent | TouchEvent) {
-  if (props.banners.length <= 1) return
-
-  stopAutoPlay()
+let slideWidth = 0
+let startPos = 0
+let startOffset = 0 // 慢速拖动 → 超过一半宽度才切换
+let startTime = 0 // 快速拖动（即使距离不足） → 也切换
+// 1. 开始拖拽
+const onPointerDown = (e: PointerEvent) => {
   isDragging.value = true
-
-  const clientX = getClientX(e)
-  if (clientX === null) {
-    isDragging.value = false
-    return
+  startPos = e.clientX
+  startOffset = trackOffset.value
+  startTime = Date.now()
+  // 防止图片拖拽/选中
+  if (e.target instanceof HTMLImageElement) {
+    e.preventDefault()
   }
-
-  startPos.value = clientX
-
-  // 添加全局监听（防止鼠标移出容器丢失事件）
-  document.addEventListener('mousemove', onDragMove)
-  document.addEventListener('touchmove', onDragMove, { passive: false })
-  document.addEventListener('mouseup', onDragEnd)
-  document.addEventListener('touchend', onDragEnd)
-  document.addEventListener('touchcancel', onDragEnd)
 }
-
-// 拖拽中
-function onDragMove(e: MouseEvent | TouchEvent) {
+// 2. 持续监听滑动距离
+const onPointerMove = (e: PointerEvent) => {
   if (!isDragging.value) return
-  e.preventDefault?.() // 阻止滚动等默认行为
+  // 只有移动超过阈值
+  const deltaX = e.clientX - startPos
+  if (Math.abs(deltaX) >= 5) {
+    // if (deltaX > 0 && !(offsetCount + virtualIndex.value)) {
+    //   // offsetCount--
+    //   virtualData.value.unshift(virtualData.value.pop() || { url: '' })
+    //   startOffset = -slideWidth
+    // }
+    trackOffset.value = startOffset + deltaX
+  }
 }
-
-// 拖拽结束
-function onDragEnd(e: MouseEvent | TouchEvent) {
+// 3. 结束拖拽
+const onPointerUp = () => {
   if (!isDragging.value) return
-
-  const endX = getClientX(e)
-  if (endX === null) {
-    isDragging.value = false
-    cleanupListeners()
-    if (props.autoPlay) startAutoPlay()
-    return
-  }
-
-  const diff = startPos.value - endX
-  const threshold = 50 // 滑动阈值
-
-  if (Math.abs(diff) > threshold) {
-    if (diff > 0) {
-      next()
-    } else {
-      prev()
-    }
-  }
-
   isDragging.value = false
-  cleanupListeners()
 
-  if (props.autoPlay) {
-    startAutoPlay()
+  const now = Date.now()
+  const duration = now - startTime
+  const delta = trackOffset.value - startOffset // 拖动距离(负=左, 正=右)
+  const absDelta = Math.abs(delta)
+
+  // 距离阈值比例(50%)
+  const distanceThreshold = slideWidth * 0.5
+  // 计算速度(避免除零): px/ms，约 800px/s
+  const velocity = duration > 0 ? absDelta / duration : 0
+  if (absDelta > distanceThreshold || velocity > 0.8) {
+    if (delta > 0) {
+      goTo(currentIndex.value ? currentIndex.value - 1 : props.list.length - 1)
+    } else {
+      goTo(currentIndex.value === props.list.length - 1 ? 0 : currentIndex.value + 1)
+    }
+  } else {
+    trackOffset.value = startOffset
   }
 }
-
-function handleMouseLeave() {
-  if (isDragging.value) return
-  // 可选：鼠标离开时不停止自动播放，除非你希望暂停
+// 跳转
+const goTo = (index: number) => {
+  currentIndex.value = index
+  updateSlideSize()
 }
-
-function cleanupListeners() {
-  document.removeEventListener('mousemove', onDragMove)
-  document.removeEventListener('touchmove', onDragMove)
-  document.removeEventListener('mouseup', onDragEnd)
-  document.removeEventListener('touchend', onDragEnd)
-  document.removeEventListener('touchcancel', onDragEnd)
+// 更新 slide 宽度（响应式）
+const updateSlideSize = () => {
+  if (bannerRef.value) {
+    slideWidth = bannerRef.value.clientWidth
+    trackOffset.value = (-currentIndex.value + offsetCount) * slideWidth
+  }
 }
-
-// 生命周期
+// 初始化 & 响应式
 onMounted(() => {
-  startAutoPlay()
+  updateSlideSize()
+  window.addEventListener('resize', updateSlideSize)
+  // 绑定全局 move/up（确保拖出容器也能响应）
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
 })
-
-onUnmounted(() => {
-  stopAutoPlay()
-  cleanupListeners()
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateSlideSize)
+  window.removeEventListener('pointermove', onPointerMove)
+  window.removeEventListener('pointerup', onPointerUp)
 })
-
-onDeactivated(() => {
-  stopAutoPlay()
-})
-
-// 监听 banners 变化
-watch(
-  () => props.banners,
-  () => {
-    currentIndex.value = 0
-    stopAutoPlay()
-    if (props.autoPlay) startAutoPlay()
-  }
-)
 </script>
 
-<style scoped>
-.banner-carousel {
+<style>
+.banner-swiper {
   position: relative;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
   overflow: hidden;
-  user-select: none;
-  -webkit-user-drag: none;
-  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y; /* 禁止浏览器处理水平手势, 避免提前结束 pointer 事件 */
 }
-
-.banner-carousel__track {
+.banner-track {
   display: flex;
   width: 100%;
   height: 100%;
+  cursor: grab;
 }
-
-.banner-carousel__slide {
-  display: flex;
-  width: 100%;
-  height: 100%;
-}
-
-.banner-carousel__slide img {
-  flex-shrink: 0;
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-}
-
 /* 指示器 */
-.banner-carousel__dots {
+.banner-dots {
   position: absolute;
-  bottom: 16px;
+  bottom: 0.1rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 8px;
 }
-
-.dot {
-  width: 10px;
-  height: 10px;
+.banner-dots_item {
+  width: 0.1rem;
+  height: 0.1rem;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.5);
-  border: none;
   cursor: pointer;
   transition: background 0.3s;
 }
-
-.dot.active {
+.banner-dots_active {
+  width: 0.24rem;
+  border-radius: 0.06rem;
   background: white;
 }
 </style>

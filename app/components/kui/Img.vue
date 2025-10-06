@@ -7,12 +7,14 @@ const props = withDefaults(
     width?: string
     height?: string
     aspectRatio?: string
+    draggable?: boolean
     fit?: '' | 'cover' | 'contain' | 'fill'
   }>(),
   {
     width: '',
     height: '',
     aspectRatio: '',
+    draggable: false,
     fit: ''
   }
 )
@@ -27,6 +29,7 @@ const onLoad = () => {
   loaded.value = true
 }
 const onError = () => {
+  console.log(2334)
   // loaderr.value = true
   if (imgRef.value) {
     imgRef.value.style.visibility = 'hidden' // 兼容隐藏破图
@@ -65,5 +68,5 @@ const imgStyle = computed<CSSProperties>(() => {
 </script>
 
 <template>
-  <img ref="imgRef" :src="src" :style="imgStyle" loading="lazy" @load="onLoad" @error="onError" />
+  <img ref="imgRef" :src="src" :style="imgStyle" loading="lazy" :draggable="draggable" @load="onLoad" @error="onError" />
 </template>
