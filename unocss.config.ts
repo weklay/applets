@@ -2,7 +2,7 @@
 import { defineConfig } from 'unocss'
 
 // 方向
-const tblr = { t: 'top', b: 'bottom', l: 'left', r: 'right' }
+const tblr: Record<string, string> = { t: 'top', b: 'bottom', l: 'left', r: 'right' }
 // 设计稿适配750px: 1rem = 100px
 const remUnit = 100
 
@@ -40,6 +40,20 @@ export default defineConfig({
 
   // 自定义规则（可选）
   rules: [
+    [
+      /^theme-bg-(.*)$/,
+      ([, c]) => ({
+        background: `var(--color-${c}-background)`,
+        '--text': `var(--color-${c}-text)`
+      })
+    ],
+    // 主题色
+    ['vi-color', { color: 'var(--klay-vi)' }],
+    ['text-color', { color: 'var(--klay-text)' }],
+    ['desc-color', { color: 'var(--klay-text_nav)' }],
+    ['text-dark', { color: 'var(--klay-dark)' }],
+    ['bg-vi', { background: 'var(--klay-vi)' }],
+    ['bg-black', { background: 'var(--klay-black)' }],
     // 文本显示行数
     ['ellipsis1', { overflow: 'hidden', 'text-overflow': 'ellipsis', 'white-space': 'nowrap' }],
     [
@@ -64,10 +78,11 @@ export default defineConfig({
     ['not-italic', { 'font-style': 'normal' }],
     ['font-normal', { 'font-weight': 'normal' }],
     ['font-bold', { 'font-weight': 'bold' }],
-    // 字体颜色
-    ['c999', { color: '#999' }],
     // 字体大小
     [/^size(\d+)$/, ([_, n]) => ({ 'font-size': `${n}px` })],
+    // 字体行高
+    ['leading', { 'line-height': 1 }],
+    [/^leading-(\d+)$/, ([_, n]) => ({ 'line-height': `${n}px` })],
     // 线条方向: 支持 border-t, border-t-2
     ['border', { 'border-width': '1px' }],
     [/^border-(t|b|l|r)(?:-(\d+))?$/, ([_, dir, n]) => ({ [`border-${tblr[dir]}-width`]: n ? `${n}px` : '1px' })],
@@ -90,8 +105,43 @@ export default defineConfig({
     // 边框颜色
     ['border-none', { 'border-style': 'none' }],
     ['border-c333', { 'border-color': '#333' }],
+    // 圆角
+    [/^radius-(\d+)$/, ([_, n]) => ({ 'border-radius': n ? `${n}px` : n })],
+    // 行/块
+    ['inline', { display: 'inline' }],
+    ['block', { display: 'block' }],
+    ['inline-block', { display: 'inline-block' }],
+    ['text-nowrap', { 'white-space': 'nowrap' }],
+    // 盒子-行布局
+    ['flex', { display: 'flex' }],
+    ['flex-nowrap', { display: 'flex', 'flex-wrap': 'nowrap' }],
+    ['flex-wrap', { display: 'flex', 'flex-wrap': 'wrap' }],
+    ['flex-wrap-reverse', { display: 'flex', 'flex-wrap': 'wrap-reverse' }],
+    // 盒子-列布局
+    ['flex-row', { display: 'flex', 'flex-direction': 'row' }],
+    ['flex-row-reverse', { display: 'flex', 'flex-direction': 'row-reverse' }],
+    ['flex-col', { display: 'flex', 'flex-direction': 'column' }],
+    ['flex-col-reverse', { display: 'flex', 'flex-direction': 'column-reverse' }],
+    // 盒子-边距
+    [/^gap-(\d+)$/, ([_, n]) => ({ gap: `${n}px` })],
+    [/^gap-x-(\d+)$/, ([_, n]) => ({ 'column-gap': `${n}px` })],
+    [/^gap-y-(\d+)$/, ([_, n]) => ({ 'row-gap': `${n}px` })],
+    // 盒子-弹性布局
+    ['flex-1', { flex: 1 }],
+    ['shrink', { 'flex-shrink': 1 }],
+    ['shrink-0', { 'flex-shrink': 0 }],
+    // 显示隐藏-溢出-滚动
+    ['overflow-hidden', { overflow: 'hidden' }],
+    ['overflow-visible', { overflow: 'visible' }],
+    ['overflow-x-auto', { 'overflow-x': 'auto' }],
+    ['overflow-y-auto', { 'overflow-y': 'auto' }],
     // 图层
     [/^z-(\d+)$/, ([_, n]) => ({ 'z-index': n })],
+    // 定位
+    [/^top-(\d+)$/, ([_, n]) => ({ top: n ? `${n}px` : n })],
+    [/^bottom-(\d+)$/, ([_, n]) => ({ bottom: n ? `${n}px` : n })],
+    [/^left-(\d+)$/, ([_, n]) => ({ left: n ? `${n}px` : n })],
+    [/^right-(\d+)$/, ([_, n]) => ({ right: n ? `${n}px` : n })],
     // 宽度/高度
     [/^w-(\d+)$/, ([_, n]) => ({ width: `${n}px` })],
     [/^h-(\d+)$/, ([_, n]) => ({ height: `${n}px` })],
@@ -114,20 +164,36 @@ export default defineConfig({
     [/^ml-(\d+)$/, ([_, n]) => ({ 'margin-left': `${n}px` })],
     [/^mr-(\d+)$/, ([_, n]) => ({ 'margin-right': `${n}px` })],
     // 组件样式
-    ['btn-primary', { 'background-color': '#007bff', color: 'white', padding: '8px 16px', 'border-radius': '4px' }],
-    ['text-title', { 'font-size': '2rem', 'font-weight': 'bold', 'line-height': '1.2' }]
+    ['text-title', { 'font-size': '2rem', 'font-weight': 'bold', 'line-height': '1.2' }],
+    ['app-tab-bar', { background: 'var(--klay-bg_nav)', color: 'var(--klay-text_nav)' }],
+    ['app-tab-active', { color: 'var(--klay-vi)' }]
   ],
-
-  // 指定哪些文件需要扫描（关键：实现“按需提取”）
-  include: [/\.vue$/, /\.vue\?vue/, /\.[tj]sx?$/, /\.md(\?vue)?/, './app.vue'],
-  exclude: ['node_modules', '.git'],
-
+  preflights: [
+    {
+      getCSS: () => `
+        .marquee-box {
+          display: inline-block;
+          white-space: nowrap;
+          animation: marquee 36s linear infinite;
+        }
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `
+    }
+  ],
   // 开启主题（可选）
   theme: {
     colors: {
-      primary: '#007bff',
-      success: '#28a745',
-      danger: '#dc3545'
+      primary: 'var(--color-primary)',
+      secondary: 'var(--color-secondary)',
+      background: 'var(--color-background)',
+      foreground: 'var(--color-foreground)'
     }
   }
+
+  // 指定哪些文件需要扫描（关键：实现“按需提取”）
+  // include: [/\.vue$/, /\.vue\?vue/, /\.[tj]sx?$/, /\.md(\?vue)?/, './app.vue'],
+  // exclude: ['node_modules', '.git'],
 })

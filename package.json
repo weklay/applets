@@ -21,6 +21,9 @@
   "devDependencies": {
     "@unocss/nuxt": "^66.5.2",
     "prettier": "^3.6.2",
-    "unocss": "^66.5.2"
+    "sass": "^1.93.2",
+    "unocss": "^66.5.2",
+    "unplugin-icons": "^22.3.0",
+    "unplugin-vue-components": "^29.1.0"
   }
 }
