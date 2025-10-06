@@ -1,20 +1,9 @@
 <script setup lang="ts">
-// 动态计算html属性
-const { isMobile } = useDevice()
-// 使用 reactive + watch 实现响应式更新
-const htmlAttrs = reactive({ 'data-device': 'desktop', 'data-ui-contain': '1' })
-
-watch(
-  isMobile,
-  mobile => {
-    htmlAttrs['data-device'] = mobile ? 'mobile' : 'desktop'
-  },
-  { immediate: true }
-)
 useHead({
-  htmlAttrs: htmlAttrs,
   meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1, user-scalable=no' }]
 })
+// 动态计算html属性
+useDevice()
 const useKui = kuiStore()
 // 设置主题
 if (import.meta.client) {
@@ -50,6 +39,7 @@ if (import.meta.client) {
 
 <style>
 :root {
+  --lay-width: 504.8725637181409px;
   --klay-bg: #1a1a1a;
   --klay-bg_nav: #0a0a0a;
   --klay-info: #333;
@@ -64,14 +54,14 @@ if (import.meta.client) {
 /* [data-theme='dark'] {
   --color-primary: black;
 } */
-html[data-ui-contain='1'] {
-  max-width: 504.8725637181409px;
-  margin: 0 auto;
-  background: var(--klay-info);
-  font-size: calc(504.8725637181409px / 7.5);
-}
 html[data-device='mobile'] {
   font-size: calc(100vw / 7.5);
+}
+html[data-ui-contain='1'] {
+  max-width: var(--lay-width);
+  margin: 0 auto;
+  background: var(--klay-info);
+  font-size: calc(var(--lay-width) / 7.5);
 }
 body {
   background: var(--klay-bg);

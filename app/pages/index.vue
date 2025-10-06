@@ -21,7 +21,7 @@ const gameOpts = [
     <!--头部-->
     <header class="relative border-b border-b-solid border-c333" style="background-color: #1a1a1a">
       <div class="relative z-2 flex-rcb h-90 pt-7 pb-7 pl-10 pr-20 box-border">
-        <KuiImg :src="getCdn('/siteadmin/upload/img/1938232113923428353.avif')" class="w-285 h-80 cursor" />
+        <KuiImg :src="getCdn('/siteadmin/upload/img/1938232113923428353.webp')" class="w-256 h-76 cursor" />
         <div class="flex-ccc h100 cursor">
           <KuiImg :src="getCdn('/siteadmin/skin/lobby_asset/1-1-1/common/_sprite/icon_dt_1ss.avif')" class="w-54 h-50" />
           <span class="size22 desc-color" @click="useKui.onToast('弹出提示')">搜索</span>
@@ -44,7 +44,11 @@ const gameOpts = [
     > -->
       <!--banner-->
       <div class="pt-20 pb-9 pl-20 pr-20">
-        <KuiImg :src="getCdn(bannerList[0]?.url)" class="w100 h-221 radius-16" />
+        <KuiBanner :total="bannerList.length">
+          <template v-for="(item, index) in bannerList" :key="index">
+            <KuiImg :src="getCdn(item.url)" class="w100 h-209 radius-16" />
+          </template>
+        </KuiBanner>
       </div>
       <!--通知-->
       <div class="flex-rcb px-25 h-60">
@@ -66,7 +70,7 @@ const gameOpts = [
       </div>
       <!--奖池-->
       <div class="pt-20 pb-10 pl-20 pr-20">
-        <KuiImg :src="getCdn('/cocos/icon/vjp/1916483700860297217.avif')" class="w100 h-177" />
+        <KuiImg :src="getCdn('/cocos/icon/vjp/1916483700860297217.webp')" class="w100 h-177" />
       </div>
       <!--登录-->
       <div class="w100 pl-20 pr-10 box-border flex-rcb">
