@@ -8,7 +8,8 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: '凤凰国际-kui',
-      htmlAttrs: { 'data-ui-contain': '1', 'data-device': 'mobile' },
+      htmlAttrs: { 'data-device': 'mobile' },
+      meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1, user-scalable=no' }],
       link: [
         {
           rel: 'icon',

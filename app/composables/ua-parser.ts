@@ -1,3 +1,13 @@
+export function user_ua_device() {
+  const updateMedia = () => mediaScreen()
+  updateMedia()
+  onMounted(() => {
+    window.addEventListener('resize', updateMedia)
+    onUnmounted(() => window.removeEventListener('resize', updateMedia))
+  })
+}
+
+// 媒体查询-响应式布局
 function mediaScreen() {
   const e = navigator.userAgent
   const isPad = /iPad/.test(e) || (!/iPhone OS \d+_/i.test(e) && window.screen.height > window.screen.width && /Macintosh|Mac OS X/i.test(e))
@@ -37,18 +47,5 @@ function mediaScreen() {
 
     // 标记是否启用 containment 布局
     s.setAttribute('data-ui-contain', d)
-  }
-}
-
-export function useDevice() {
-  if (import.meta.client) {
-    const update = () => {
-      mediaScreen()
-    }
-    onMounted(() => {
-      update()
-      window.addEventListener('resize', update)
-      onUnmounted(() => window.removeEventListener('resize', update))
-    })
   }
 }

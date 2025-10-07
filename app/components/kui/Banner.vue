@@ -17,7 +17,7 @@
       }"
     >
       <template v-for="(item, index) in virtualData" :key="index">
-        <KuiImg :src="getCdn(item.url)" class="w100 h-209 shrink-0 radius-16" />
+        <KuiImg :src="getCdn(item.url)" :skelBg :lazy="false" class="w100 h-209 shrink-0 radius-16" />
       </template>
     </div>
 
@@ -33,11 +33,16 @@ const props = withDefaults(
   defineProps<{
     list: { url: '' }[]
     autoPlay?: number
+    skelBg?: string
   }>(),
   {
-    autoPlay: 5000
+    autoPlay: 5000,
+    skelBg: ''
   }
 )
+// 最大下标
+const total = computed(() => props.list.length)
+const maxIdx = computed(() => total.value - 1)
 // 虚拟列表（循环用）
 const virtualData = ref([...props.list])
 // dom
@@ -45,7 +50,7 @@ const bannerRef = ref()
 const trackRef = ref()
 // 当前下标
 const currentIndex = ref(0) // 真实索引
-const virtualIndex = ref(0) // 虚拟索引
+let virtualIndex = 0 // 虚拟索引
 let offsetCount = 0
 const trackOffset = ref(0)
 // 拖拽状态
@@ -71,11 +76,21 @@ const onPointerMove = (e: PointerEvent) => {
   // 只有移动超过阈值
   const deltaX = e.clientX - startPos
   if (Math.abs(deltaX) >= 5) {
-    // if (deltaX > 0 && !(offsetCount + virtualIndex.value)) {
-    //   // offsetCount--
-    //   virtualData.value.unshift(virtualData.value.pop() || { url: '' })
-    //   startOffset = -slideWidth
-    // }
+    // 左侧插入
+    if (deltaX > 0 && !virtualIndex) {
+      console.log(virtualIndex)
+      leftInsert()
+      startOffset = -slideWidth
+      console.log(virtualIndex)
+    }
+
+    // 右侧插入
+    if (deltaX < 0 && virtualIndex === maxIdx.value) {
+      console.log(virtualIndex)
+      rightInsert()
+      startOffset = (currentIndex.value - offsetCount) * -slideWidth
+      console.log(virtualIndex)
+    }
     trackOffset.value = startOffset + deltaX
   }
 }
@@ -88,31 +103,52 @@ const onPointerUp = () => {
   const duration = now - startTime
   const delta = trackOffset.value - startOffset // 拖动距离(负=左, 正=右)
   const absDelta = Math.abs(delta)
-
+  console.log(delta)
   // 距离阈值比例(50%)
   const distanceThreshold = slideWidth * 0.5
   // 计算速度(避免除零): px/ms，约 800px/s
   const velocity = duration > 0 ? absDelta / duration : 0
   if (absDelta > distanceThreshold || velocity > 0.8) {
     if (delta > 0) {
-      goTo(currentIndex.value ? currentIndex.value - 1 : props.list.length - 1)
+      goTo(currentIndex.value ? currentIndex.value - 1 : maxIdx.value)
     } else {
-      goTo(currentIndex.value === props.list.length - 1 ? 0 : currentIndex.value + 1)
+      goTo(currentIndex.value === maxIdx.value ? 0 : currentIndex.value + 1)
     }
   } else {
     trackOffset.value = startOffset
   }
 }
+// 左侧插入
+const leftInsert = () => {
+  virtualData.value.unshift(virtualData.value.pop() || { url: '' })
+  offsetCount--
+  virtualIndex = (currentIndex.value - offsetCount) % total.value
+}
+// 右侧插入
+const rightInsert = () => {
+  virtualData.value.push(virtualData.value.shift() || { url: '' })
+  offsetCount++
+  virtualIndex = (currentIndex.value - offsetCount) % total.value
+}
 // 跳转
 const goTo = (index: number) => {
   currentIndex.value = index
+  virtualIndex = (index - offsetCount) % total.value
+  console.log(virtualIndex)
   updateSlideSize()
 }
 // 更新 slide 宽度（响应式）
 const updateSlideSize = () => {
   if (bannerRef.value) {
     slideWidth = bannerRef.value.clientWidth
-    trackOffset.value = (-currentIndex.value + offsetCount) * slideWidth
+    console.log('距离前=' + trackOffset.value)
+    // 虚拟顺序
+    if (offsetCount) {
+      trackOffset.value = -virtualIndex * slideWidth
+    } else {
+      trackOffset.value = -currentIndex.value * slideWidth
+    }
+    console.log('距离后=' + trackOffset.value)
   }
 }
 // 初始化 & 响应式

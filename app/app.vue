@@ -1,14 +1,16 @@
 <script setup lang="ts">
-useHead({
-  meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1, user-scalable=no' }]
+await useAsyncData('client-device', async () => {
+  const res = client_ua_device()
+  useHead({
+    htmlAttrs: { 'data-ui-contain': ['mobile', 'tablet'].includes(res) ? '0' : '1' }
+  })
+  return res
 })
-// 动态计算html属性
-useDevice()
-const useKui = kuiStore()
 // 设置主题
 if (import.meta.client) {
-  // document.documentElement.setAttribute('data-theme', 'dark')
+  user_ua_device()
 }
+const useKui = kuiStore()
 </script>
 
 <template>
@@ -25,8 +27,9 @@ if (import.meta.client) {
       row; align-items: center; justify-content: space-between;} .flex-ccc{display: flex; flex-direction: column; align-items: center;
       justify-content: center;} .flex-csb{display: flex; flex-direction: column; align-items: start; justify-content:
       space-between;}.scrollbar-none::-webkit-scrollbar, .scrollbar-none::-webkit-scrollbar-track{display: none;width: 0;}.cursor{cursor:
-      pointer;}.w100{width: 100%;}.h100{height: 100%;}.scale-fade-enter-active, .scale-fade-leave-active { transition: all 0.2s;
-      }.scale-fade-enter-from, .scale-fade-leave-to {opacity: 0; transform: translate(-50%, -50%) scale(0);}
+      pointer;}.w100{width: 100%;}.h100{height: 100%;}.kui-img{max-width: 100%;max-height: 100%;height: auto;font-size: 0;}.scale-fade-enter-active,
+      .scale-fade-leave-active { transition: all 0.2s; }.scale-fade-enter-from, .scale-fade-leave-to {opacity: 0; transform: translate(-50%, -50%)
+      scale(0);}
     </Style>
   </Head>
   <NuxtLayout>
@@ -56,6 +59,9 @@ if (import.meta.client) {
 } */
 html[data-device='mobile'] {
   font-size: calc(100vw / 7.5);
+}
+html[data-ui-contain='0'] {
+  --lay-width: 100%;
 }
 html[data-ui-contain='1'] {
   max-width: var(--lay-width);

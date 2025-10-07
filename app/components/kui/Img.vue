@@ -7,13 +7,16 @@ const props = withDefaults(
     width?: string
     height?: string
     aspectRatio?: string
+    lazy?: boolean
     draggable?: boolean
     fit?: '' | 'cover' | 'contain' | 'fill'
+    skelBg?: string
   }>(),
   {
     width: '',
     height: '',
     aspectRatio: '',
+    lazy: true,
     draggable: false,
     fit: ''
   }
@@ -24,25 +27,42 @@ const imgRef = ref<HTMLImageElement | null>(null)
 
 // 状态管理
 const loaded = ref(false) // 加载完成
-// const loaderr = ref(false) // 加载错误
 const onLoad = () => {
   loaded.value = true
 }
 const onError = () => {
-  console.log(2334)
-  // loaderr.value = true
-  if (imgRef.value) {
-    imgRef.value.style.visibility = 'hidden' // 兼容隐藏破图
-  }
+  // 兼容隐藏破图
+  if (imgRef.value) imgRef.value.style.visibility = 'hidden'
 }
+// 设置骨架屏
+const skelStyle = computed(() => {
+  if (props.skelBg && !loaded.value) {
+    return { style: { background: props.skelBg, 'border-radius': '8px' } }
+  }
+  return {}
+})
 // 图片样式
-const imgStyle = computed<CSSProperties>(() => {
+const imgStyle = computed(() => {
+  // html属性
+  const attr: Record<string, string> = { draggable: props.draggable + '' }
+  if (props.lazy) attr['loading'] = 'lazy'
+  // 样式
   const style: CSSProperties = {}
   if (props.width) style['width'] = props.width
   if (props.height) style['height'] = props.height
   if (props.fit) style['object-fit'] = props.fit
   if (props.aspectRatio) style['aspect-ratio'] = props.aspectRatio
-  return style
+  return Object.keys(style).length ? { ...attr, style } : attr
+})
+// 兼容缓存中读取
+onMounted(() => {
+  if (imgRef.value && imgRef.value.complete) {
+    if (imgRef.value.naturalWidth === 0) {
+      onError()
+    } else {
+      onLoad()
+    }
+  }
 })
 
 // 懒加载
@@ -68,5 +88,7 @@ const imgStyle = computed<CSSProperties>(() => {
 </script>
 
 <template>
-  <img ref="imgRef" :src="src" :style="imgStyle" loading="lazy" :draggable="draggable" @load="onLoad" @error="onError" />
+  <div v-bind="skelStyle" class="inline-block">
+    <img ref="imgRef" :src="src" v-bind="imgStyle" class="kui-img" @load="onLoad" @error="onError" />
+  </div>
 </template>

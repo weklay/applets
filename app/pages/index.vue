@@ -44,7 +44,7 @@ const gameOpts = [
     > -->
       <!--banner-->
       <div class="pt-20 pb-9 pl-20 pr-20">
-        <KuiBanner :list="bannerList" />
+        <KuiBanner :list="bannerList" skelBg="#222" />
       </div>
       <!--通知-->
       <div class="flex-rcb px-25 h-60">
